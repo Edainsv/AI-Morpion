@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>AI Morpion</title>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style type="text/css">
+        * {padding: 0; margin: 0; box-sizing: border-box;}
+        body {height: 100vh; width: 100%; display: flex; justify-content: center; align-items: center; background-color: #1e1e1e;}
+        #morpion {width: 600px; height: 600px; background-color: aliceblue; display: flex; flex-wrap: wrap; outline: 5px solid black; border-radius: 5px; justify-content: center; align-items: center; font-size: 3rem;}
+        .cell {width: 200px; height: 200px; display: flex; justify-content: center; align-items: center; outline: 2px solid black; cursor: pointer; font-size: 4rem;}
+        .cell:hover{background-color: antiquewhite; transition: background 0.2s ease-in-out;}
+        .cell.taken {background-color: #ccc; cursor: not-allowed;}
+        #scoreboard {color: #fff; text-align: center; padding: 30px;}
+    </style>
+</head>
+
+<body>
+    <div id="game">
+        <h2 id="scoreboard">P.X: 0 - P.O: 0</h2>
+
+        <div id="morpion"></div>
+    </div>
+
+    <script>
+        const morpion = document.getElementById('morpion');
+        const marks = ['X', 'O'];
+        let scores = [0, 0];
+        let count = 0;
+        let cells = [];
+        let currentPlayer = 0;
+
+        createGrid(3);
+
+        function createGrid (size) {
+            resetGame();
+
+            for (let i = 0; i < size; i++) {
+                cells[i] = new Array();
+                for (let j = 0; j < size; j++) {
+                    cells[i][j] = document.createElement('div');
+                    cells[i][j].classList.add('cell');
+
+                    cells[i][j].addEventListener('click', (e) => playCell(e.target));
+                    
+                    morpion.appendChild(cells[i][j]);
+                }   
+            }
+        }
+
+        /**
+         *  Play in the clicked cell
+         */
+        function playCell(e) {
+            e.classList.add('taken'); // Grise la case jouée
+
+            if (e.innerText === '') {
+                count++;
+                e.innerText = marks[currentPlayer];
+                let win = checkVictory();
+
+                if (!win && count == 9){
+                    showEnd(false);
+                } else if (!win) {
+                    currentPlayer = togglePlayer();
+                } else {
+                    scores[currentPlayer]++;
+                    document.getElementById('scoreboard').innerText = `P.X: ${scores[0]} - P.O: ${scores[1]}`;
+
+                    showEnd(true);
+                }
+            }
+        }
+
+        /**
+         *  Change player turn
+         */
+        function togglePlayer() {
+            return currentPlayer === 0 ? 1 : 0;
+        }
+
+        /**
+         *  Check if anyone win
+         */
+        function checkVictory() {
+            let win = false;
+
+            if (
+                // Rows
+                cells[0][0].innerText != '' && cells[0][0].innerText == cells[0][1].innerText && cells[0][1].innerText == cells[0][2].innerText ||
+                cells[1][0].innerText != '' && cells[1][0].innerText == cells[1][1].innerText && cells[1][1].innerText == cells[1][2].innerText ||
+                cells[2][0].innerText != '' && cells[2][0].innerText == cells[2][1].innerText && cells[2][1].innerText == cells[2][2].innerText ||
+
+                // Columns
+                cells[0][0].innerText != '' && cells[0][0].innerText == cells[1][0].innerText && cells[1][0].innerText == cells[2][0].innerText ||
+                cells[0][1].innerText != '' && cells[0][1].innerText == cells[1][1].innerText && cells[1][1].innerText == cells[2][1].innerText ||
+                cells[0][2].innerText != '' && cells[0][2].innerText == cells[1][2].innerText && cells[1][2].innerText == cells[2][2].innerText ||
+
+                // Diagonal
+                cells[0][0].innerText != '' && cells[0][0].innerText == cells[1][1].innerText && cells[1][1].innerText == cells[2][2].innerText ||
+                cells[0][2].innerText != '' && cells[0][2].innerText == cells[1][1].innerText && cells[1][1].innerText == cells[2][0].innerText
+            ) {
+                win = true;
+            }
+
+            return win;
+        }
+
+        function resetGame() {
+            morpion.innerHTML = '';
+            count = 0;
+
+        }
+
+        function showEnd(win = false) {
+            setTimeout(() => {
+                if (win) {
+                    morpion.innerText = 'Player ' + marks[currentPlayer] + ' win !';
+                } else {
+                    morpion.innerText = 'No winner in this game !';
+                }
+            }, 50);
+
+            setTimeout(() => createGrid(3), 2000);
+        }
+    </script>
+</body>
+</html>
