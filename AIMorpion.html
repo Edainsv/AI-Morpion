@@ -129,8 +129,7 @@
 
         function aiMove() {
             let emptyCells = [];
-            
-            // Récupère toutes les cases vides
+
             for (let i = 0; i < 3; i++) {
                 for (let j = 0; j < 3; j++) {
                     if (cells[i][j].innerText === '') {
@@ -139,31 +138,27 @@
                 }
             }
 
-            // 1️⃣ Vérifier si l'IA peut gagner et jouer ce coup
             for (let { cell, row, col } of emptyCells) {
-                cell.innerText = marks[1]; // Simule le coup de l'IA
+                cell.innerText = marks[1];
                 if (checkVictory()) {
                     return finalizeAIMove(cell);
                 }
-                cell.innerText = ''; // Annule le coup
+                cell.innerText = '';
             }
 
-            // 2️⃣ Vérifier si le joueur peut gagner et bloquer
             for (let { cell, row, col } of emptyCells) {
-                cell.innerText = marks[0]; // Simule le coup du joueur
+                cell.innerText = marks[0];
                 if (checkVictory()) {
-                    cell.innerText = marks[1]; // L'IA bloque le joueur
+                    cell.innerText = marks[1];
                     return finalizeAIMove(cell);
                 }
-                cell.innerText = ''; // Annule le coup
+                cell.innerText = '';
             }
 
-            // 3️⃣ Priorité : Prendre la case centrale si elle est libre
             if (cells[1][1].innerText === '') {
                 return finalizeAIMove(cells[1][1]);
             }
 
-            // 4️⃣ Priorité : Jouer dans un coin libre
             const corners = [
                 cells[0][0], cells[0][2],
                 cells[2][0], cells[2][2]
@@ -174,7 +169,6 @@
                 return finalizeAIMove(randomCorner);
             }
 
-            // 5️⃣ Sinon, jouer un coup aléatoire
             if (emptyCells.length > 0) {
                 let randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)].cell;
                 return finalizeAIMove(randomCell);
@@ -185,7 +179,7 @@
          *  End AI play 
          */
         function finalizeAIMove(cell) {
-            cell.innerText = marks[1]; // L'IA joue "O"
+            cell.innerText = marks[1];
             cell.classList.add('taken');
             count++;
 
