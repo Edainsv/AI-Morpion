@@ -54,7 +54,7 @@
          *  Play in the clicked cell
          */
         function playCell(e) {
-            e.classList.add('taken'); // Grise la case jouée
+            e.classList.add('taken');
 
             if (e.innerText === '') {
                 count++;
@@ -64,7 +64,8 @@
                 if (!win && count == 9){
                     showEnd(false);
                 } else if (!win) {
-                    currentPlayer = togglePlayer();
+                    setTimeout(aiMove, 500);
+                    // currentPlayer = togglePlayer();
                 } else {
                     scores[currentPlayer]++;
                     document.getElementById('scoreboard').innerText = `P.X: ${scores[0]} - P.O: ${scores[1]}`;
@@ -73,6 +74,7 @@
                 }
             }
         }
+
 
         /**
          *  Change player turn
@@ -111,7 +113,6 @@
         function resetGame() {
             morpion.innerHTML = '';
             count = 0;
-
         }
 
         function showEnd(win = false) {
@@ -124,6 +125,80 @@
             }, 50);
 
             setTimeout(() => createGrid(3), 2000);
+        }
+
+        function aiMove() {
+            let emptyCells = [];
+            
+            // Récupère toutes les cases vides
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (cells[i][j].innerText === '') {
+                        emptyCells.push({ cell: cells[i][j], row: i, col: j });
+                    }
+                }
+            }
+
+            // 1️⃣ Vérifier si l'IA peut gagner et jouer ce coup
+            for (let { cell, row, col } of emptyCells) {
+                cell.innerText = marks[1]; // Simule le coup de l'IA
+                if (checkVictory()) {
+                    return finalizeAIMove(cell);
+                }
+                cell.innerText = ''; // Annule le coup
+            }
+
+            // 2️⃣ Vérifier si le joueur peut gagner et bloquer
+            for (let { cell, row, col } of emptyCells) {
+                cell.innerText = marks[0]; // Simule le coup du joueur
+                if (checkVictory()) {
+                    cell.innerText = marks[1]; // L'IA bloque le joueur
+                    return finalizeAIMove(cell);
+                }
+                cell.innerText = ''; // Annule le coup
+            }
+
+            // 3️⃣ Priorité : Prendre la case centrale si elle est libre
+            if (cells[1][1].innerText === '') {
+                return finalizeAIMove(cells[1][1]);
+            }
+
+            // 4️⃣ Priorité : Jouer dans un coin libre
+            const corners = [
+                cells[0][0], cells[0][2],
+                cells[2][0], cells[2][2]
+            ];
+            let freeCorners = corners.filter(cell => cell.innerText === '');
+            if (freeCorners.length > 0) {
+                let randomCorner = freeCorners[Math.floor(Math.random() * freeCorners.length)];
+                return finalizeAIMove(randomCorner);
+            }
+
+            // 5️⃣ Sinon, jouer un coup aléatoire
+            if (emptyCells.length > 0) {
+                let randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)].cell;
+                return finalizeAIMove(randomCell);
+            }
+        }
+
+        /**
+         *  End AI play 
+         */
+        function finalizeAIMove(cell) {
+            cell.innerText = marks[1]; // L'IA joue "O"
+            cell.classList.add('taken');
+            count++;
+
+            if (checkVictory()) {
+                scores[1]++;
+                document.getElementById('scoreboard').innerText = `P.X: ${scores[0]} - P.O: ${scores[1]}`;
+                showEnd(true);
+                return;
+            }
+
+            if (count == 9) {
+                showEnd(false);
+            }
         }
     </script>
 </body>
